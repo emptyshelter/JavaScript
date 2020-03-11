@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript">
+	var jsObject={
+	    'func1':function(){
+			console.log(this);
+		}	
+	};
+	
+	function add(){
+		console.log(this);
+	}
+	function contextChange(){
+		console.log("context객체 this-->"+this);
+	}
+	
+</script>
+</head>
+<body>
+<h1>javascript this 객체참조변수</h1><hr>
+<script type="text/javascript">
+	window.add();
+	add();
+	jsObject.func1();
+	contextChange();
+	contextChange.call(window);
+	contextChange.call(new Object());
+	contextChange.call(new Array(1,2));
+	contextChange.call(new Date());
+	contextChange.call("문자열");
+	contextChange.apply("apply문자열");
+	
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
