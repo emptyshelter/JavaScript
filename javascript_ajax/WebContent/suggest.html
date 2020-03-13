@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<style type="text/css">
+	a{
+		text-decoration: none;
+		cursor: pointer;
+	}
+	.suggest{
+		display: block;
+		position: absolute;
+		left:112px; 
+		top: 105x;
+		width:157px;
+		border: 1px dotted blue; 
+	}
+	
+</style>
+<script type="text/javascript" src="httpRequest.js"></script>
+<script type="text/javascript">
+	function sendKeyword(){
+		var keyword = document.search.keyword.value.trim();
+		if(keyword==null|| keyword==''){
+			return;
+		}
+		//ajax요청
+		sendRequest("suggest.jsp", "keyword="+keyword, responseKeyword, "GET")
+	}
+	function responseKeyword(){
+		if(xhr.readyState== 4 && xhr.status==200){
+			var resultText = xhr.responseText;
+			/*
+			8|AJAX,AJAX 실전 프로그래밍,ASSARA,AIM,ASURA,AAA,AJA,AZERA
+			3|AJAX,AJAX 실전 프로그래밍
+			0|
+			*/
+			var resultTextArray = resultText.split("|");
+			var resultCount =resultTextArray[0];
+			if(resultCount.trim()==0){
+				return;
+			}
+			var keywordArray = resultTextArray[1].split(',');
+			showSuggestDiv(true);
+		}
+	}
+	function select(keyword){
+	}
+	function showSuggestDiv(show){
+		if(show){
+			document.getElementById('suggest').style.display='block';
+		}else{
+			document.getElementById('suggest').style.display='none';
+		}
+	}
+	window.onload=function(){
+		showSuggestDiv(false);
+	}
+</script>
+</head>
+<body>
+<h1>제시어</h1>
+<hr/>
+<form action="server_search.jsp" name="search">
+	<img src="http://sstatic.naver.net/search/2015/h_logo.png">
+	<input 	type="text" name="keyword"  
+		onkeyup="sendKeyword();"> &nbsp;
+	<input type="submit" value="검색">
+	<div id="suggest" class="suggest">
+		<div id="suggestList">
+			<a>자바라</a><br> 
+			<a>자바바</a><br> 
+			<a>자바자</a><br> 
+		</div>
+	</div>
+</form>
+
+
+
+
+
+
+</body>
+</html>
