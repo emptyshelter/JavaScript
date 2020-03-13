@@ -55,7 +55,7 @@
 	}
 	function select(keyword){
 		document.search.keyword.value=keyword;
-		//showSuggestDiv(false);
+		showSuggestDiv(false);
 		//document.search.submit();
 				
 	}
@@ -70,14 +70,7 @@
 	window.onload=function(){
 		showSuggestDiv(false);
 		document.search.keyword.addEventListener('focusout', function(e) {
-			setTimeout(function(){
-				/*
-				0.2초이후에 실행
-				*/
-				showSuggestDiv(false);
-			},200);
-			
-			
+			showSuggestDiv(false);
 		});
 		document.search.keyword.addEventListener('focusin', function(e) {
 			sendKeyword();
