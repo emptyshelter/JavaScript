@@ -6,7 +6,7 @@
 	pageEncoding="UTF-8"%>
 <%
     String guest_no = request.getParameter("guest_no");
-	if(guest_no==null||guest_no.equals(""))guest_no=guest_no;
+	if(guest_no==null||guest_no.equals(""))guest_no="5";
 	String method=request.getMethod();
 	System.out.println("*********jQuery Ajax요청정보*********");
 	System.out.println("0.jQuery Ajax요청URL    :" + request.getRequestURI());

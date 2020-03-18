@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <%@page import="com.itwill.guest.Guest"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="com.itwill.guest.GuestDao"%>
