@@ -95,7 +95,7 @@ public class GuestRestController {
 		Guest guest = guestService.selectByNo(guest_no);
 		return guest;
 	}
-	@RequestMapping(value = "guest/guest_insert_action",produces = "text/plain;charset=UTF-8" )
+	@RequestMapping(value = "guest/guest_insert_action",produces = "text/plain; charset=utf-8" )
 	public String guest_insert_action(Guest guest) throws Exception{
 		String result= "";
 		boolean insertGuest = guestService.insertGuest(guest);
@@ -106,7 +106,7 @@ public class GuestRestController {
 		}
 		return result;
 	}
-	@RequestMapping(value="/guest/guest_login_action", produces="text/plain;charset=UTF-8")
+	@RequestMapping(value="/guest/guest_login_action", produces="text/plain; charset=UTF-8")
 	public String guest_login_action(@RequestParam(value="guest_id", required = true) String guest_id,
 									@RequestParam(value="guest_pass", required = true) String guest_pass,
 									HttpSession session) {
@@ -129,7 +129,7 @@ public class GuestRestController {
 		
 		return result;
 	}
-	@RequestMapping(value = "guest/guest_session_check" , produces = "text/plain; charset =UTF-8 ")
+	@RequestMapping(value = "guest/guest_session_check" , produces = "application/json; charset=UTF-8 ")
 	public String guest_session_check(HttpSession session) {
 		String isLogin ="";
 		String result="";
@@ -147,5 +147,23 @@ public class GuestRestController {
 	@RequestMapping(value = "guest/guest_logout_action", produces = "text/plain; charset =UTF-8 ")
 	public void guest_logout_acution(HttpSession session) {
 		session.invalidate();
+	}
+	@RequestMapping(value = "guest/guest_update_action", produces = "text/plain; charset= UTF-8")
+	public String guest_update_action(Guest guest) throws Exception {
+		boolean updateGuest = guestService.updateGuest(guest);
+		String result="";
+		if (updateGuest) {
+			result = "success";
+		}
+		return result;
+	}
+	@RequestMapping(value = "guest/guest_delete_action", produces = "text/plain; charset= UTF-8")
+	public String guest_delete_action(@RequestParam int guest_no)throws Exception{
+		boolean deleteGuest = guestService.deleteGuest(guest_no);
+		String result="";
+		if (deleteGuest) {
+			result = "success";
+		}
+		return result;
 	}
 }

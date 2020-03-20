@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ko_KR">
 <head>
 <title>WELCOME TO AJAX</title>
-<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8" />
 <link rel="stylesheet" href="style.css" />
 <link rel="stylesheet" href="guest.css" type="text/css" media="screen" />
 <style type="text/css">
@@ -38,7 +38,7 @@ label.error {
 					</h3>
 				</div>
 				 */
-				
+				showLoadingDialog(false);
 			}
 		}
 	}
@@ -73,7 +73,7 @@ label.error {
 				var guestList = xmlDocument.getElementsByTagName('guest');
 				var html = "";
 				for (var i = 0; i < guestList.length; i++) {
-					var guest = guestList.item[i];
+					var guest = guestList.item(i);
 					var guest_no = guest.getElementsByTagName('guest_no').item(0).firstChild.nodeValue;
 					var guest_title = guest.getElementsByTagName('guest_title').item(0).firstChild.nodeValue;
 					html += "<div class='guest_item'>";
@@ -96,11 +96,9 @@ label.error {
 	
 	/****************guest_update_form[HTML]콜백함수******************/
 	function displayGuestUpdateForm() {
+		
 	}
 
-	
-	
-	
 
 	/****************guest_detail[JSON]콜백함수******************/
 	function displayGuestDetailJSON(element) {
@@ -108,7 +106,6 @@ label.error {
 			if(xhr.status==200){
 				var jsonStr = xhr.responseText;
 				var jsonObject = JSON.parse(jsonStr);
-				
 				
 				var guest = jsonObject[0]
 				var html = "";
@@ -136,11 +133,64 @@ label.error {
 	}
 	/****************guest_detail[XML]콜백함수******************/
 	function displayGuestDetailXML(element) {
-
+		if(xhr.readyState==4){
+			if(xhr.status==200){
+				var xmlDocument = xhr.responseXML;
+				var guestList = xmlDocument.getElementsByTagName('guest');
+				var guest = guestList.item(0);
+				console.log(guest)
+				var html = ""
+				var guest_date = guest.getElementsByTagName('guest_date').item(0).firstChild.nodeValue;
+				var guest_name = guest.getElementsByTagName('guest_name').item(0).firstChild.nodeValue;
+				var guest_email = guest.getElementsByTagName('guest_email').item(0).firstChild.nodeValue;
+				var guest_homepage = guest.getElementsByTagName('guest_homepage').item(0).firstChild.nodeValue;
+				var guest_content = guest.getElementsByTagName('guest_content').item(0).firstChild.nodeValue;
+				
+				html += "<div class='guest_date'> 날짜:"+ guest_date+"</div>"
+				html += "<div class='guest_name'> 이름:"+ guest_name+"</div>"
+				html += "<div class='guest_email'> 이메일:"+ guest_email+"</div>"
+				html += "<div class='guest_homepage'> 홈페이지:"+ guest_homepage+"</div>"
+				html += "<div class='guest_content'> 내용:"+ guest_content+"</div>"
+				
+				var divE=document.createElement('div');
+				divE.setAttribute('class','guest_detail');
+				divE.style.display='block';
+				divE.innerHTML=html;			
+				element.parentElement.appendChild(divE);
+			}
+		}
 	}
 	/****************guest_detail[HTML]콜백함수******************/
 	function displayGuestDetailHTML(element) {
-		
+		/*
+		element--> h3
+		*/
+		if(xhr.readyState==4){
+			if(xhr.status==200){
+				var htmlData=xhr.responseText;
+				/*
+				<div class="guest_date">
+					날짜:2020-03-17 18:04:47
+				</div>
+				<div class="guest_name">
+					이름:김경호
+				</div>
+						...
+				*/
+				var divE=document.createElement('div');
+				divE.setAttribute('class','guest_detail');
+				divE.style.display='block';
+				/*************삭제수정UI추가***********/
+				htmlData += "<div class='guest_delete' style='display: block;'>";
+				var guest_no = element.getAttribute('guest_no');
+				htmlData += "<input type='button' value='삭제' guest_no='"+guest_no+"'>";
+				htmlData += "<input type='button' value='수정' guest_no='"+guest_no+"'>";
+				htmlData += "</div>";
+				/***********************************/
+				divE.innerHTML=htmlData;
+				element.parentElement.appendChild(divE);
+			}
+		}
 	}
 
 	/****************guest_insert_action[text]콜백함수******************/
@@ -179,7 +229,29 @@ label.error {
 	}
 	
 	
-	
+	/****************guest_logout_action[text]콜백함수*****************/
+	function displayGuestLogoutAction(){
+		if(xhr.readyState==4){
+			if(xhr.status==200){
+				location.href='guest.html';
+				//로그아웃
+				/*
+				//login form show
+				document.getElementById('guest_login_form')
+					.style.display='block';
+				document.getElementById('guest_login_form').reset();
+				
+				
+				//logout form hide
+				document.getElementById('guest_logout_form')
+					.style.display='none';
+				document.getElementById('idSpan').innerHTML='';
+				*/
+			}
+		}
+		
+		
+	}
 	/****************guest_login_action[text]콜백함수******************/
 
 	function displayGuestLoginAction(){
@@ -187,12 +259,11 @@ label.error {
 			if(xhr.status==200){
 				var loginResultText=xhr.responseText;
 				if(loginResultText.trim()=='success'){
-					
 					location.reload();
-					
 				}else{
 					document.querySelector('#guest_login_form').guest_id.select();
-					document.querySelector('#msg').innerHTML="아이디와 패스워드가 맞지 않습니다.";
+					document.querySelector('#msg').innerHTML="아이디와 패스워드를 확인하세요.";
+					document.querySelector('#msg').style.color='red';
 				}
 			}
 		}
@@ -201,6 +272,13 @@ label.error {
 	function login_check(){
 		var jsonResult=null;
 		sendRequest('guest/guest_session_check', null, function() {
+			//로그인체크결과 도착
+			/*
+			{
+				"status": "success",
+				"login_id": "user1"
+			}
+			*/
 			if(xhr.readyState==4){
 				jsonResult=JSON.parse(xhr.responseText);
 			}
@@ -209,160 +287,222 @@ label.error {
 	}
 	
 	/*%%%%%%%%%%%%%%%%%%%%%%%메뉴 UI이벤트처리%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-	window.onload = function() {
+	window.onload = loading_ui_event;
+	function loading_ui_event() {
+		/*******login check후 UI보여주기**************/
+		var loginResultJson = login_check();
+		console.log(loginResultJson);
+		if(loginResultJson.status.trim()=='success'){
+			//logout form show
+			document.getElementById('guest_logout_form')
+				.style.display='block';
+			document.getElementById('idSpan').innerHTML=loginResultJson.login_id;
+			//login form hide
+			document.getElementById('guest_login_form')
+			.style.display='none';
+		}else{
+			//login form show
+			document.getElementById('guest_login_form')
+				.style.display='block';
+			document.getElementById('guest_login_form').reset();
+			//logout form hide
+			document.getElementById('guest_logout_form')
+			.style.display='none';
+			document.getElementById('idSpan').innerHTML='';
+		}
 		
-		var loginRsltJson = login_check();
-		if(loginRsltJson.status.trim()=='success'){
-			document.querySelector('#guest_login_form').style.display='none';
-			document.querySelector('#guest_logout_form').style.display='block';
-			document.querySelector('#idSpan').innerHTML=loginRsltJson.login_id;
-			
+		if(loginResultJson.status.trim()=='success'){
 			/**************guest_list[HTML]이벤트*****************/
 			document.getElementById('menu-a')
 				.getElementsByTagName('a').item(0)
 				.addEventListener('click',function(e){
+					//ajax요청
 					sendRequest('guest/guest_list_html',
 								null,
 								displayGuestListHTML,
 								'GET',true);
+					showLoadingDialog(true);
 					e.preventDefault();
 				});
 			
 			/*******************guest_list[JSON]이벤트************/
 			document.getElementById('menu-b')
 				.getElementsByTagName('a').item(0)
-				.addEventListener('click', function(e) {
-					sendRequest('guest/guest_list_json',null, displayGuestListJSON, 'GET', true);
+				.addEventListener('click',function(e){
+					//ajax요청
+					sendRequest('guest/guest_list_json',
+								null,
+								displayGuestListJSON,
+								'GET',true);
+					showLoadingDialog(true);
 					e.preventDefault();
-								
 				});
 			/*******************guest_list[XML]이벤트*************/
 			document.getElementById('menu-c')
 				.getElementsByTagName('a').item(0)
-				.addEventListener('click', function(e) {
-					sendRequest('guest/guest_list_xml', null, displayGuestListXML, 'GET', true);
+				.addEventListener('click',function(e){
+					//ajax요청
+					sendRequest('guest/guest_list_xml',
+								null,
+								displayGuestListXML,
+								'GET',true);
+					showLoadingDialog(true);
 					e.preventDefault();
 				});
-			
 			/**************guest_logout 이벤트[a]*****************/	
-			document.querySelector('#guest_logout_a').addEventListener('click', function(e) {
-				sendRequest('guest/guest_logout_action', null, function() {
-					if(xhr.readyState==4){
-						if(xhr.status=200){
-							location.href="guest.html";
-						}
-					}
-				}, 'GET', true)
-			});
-			
-			
+			document.querySelector('#guest_logout_a')
+				.addEventListener('click',function(){
+					//ajax로그아웃요청
+					sendRequest('guest/guest_logout_action',
+								null,displayGuestLogoutAction,
+								'GET',true);
+				});
 		}else{
-			document.querySelector('#guest_login_form').style.display='block';
-			document.querySelector('#guest_logout_form').style.display='none';
-			document.getElementById('guest_login_form').reset();
+			var menuNodeList = document.querySelectorAll(
+					'#menu-a a,#menu-b a,#menu-c a,#guest_logout_a');
+			for (var i = 0; i < menuNodeList.length; i++) {
+				menuNodeList.item(i).addEventListener('click',function(e){
+					alert('로그인하세요')
+					e.preventDefault();
+				});
+			}
+			
 		}
-		
-		
-		
-		/**************guest_logout 이벤트[a]*****************/	
 		/*******************guest_insert_form[HTML]이벤트*****/
 		document.getElementById('menu-d')
 			.getElementsByTagName('a').item(0)
-			.addEventListener('click', function(e) {
-				sendRequest('guest_insert_form.html', null, displayGuestInsertForm, 'GET', true);
+			.addEventListener('click',function(e){
+				//ajax요청
+				sendRequest('guest_insert_form.html',
+							null,
+							displayGuestInsertForm,
+							'GET',true);
+				showLoadingDialog(false);
 				e.preventDefault();
 			});
-			
 		/**************guest_login_form이벤트[submit]*********/
 		document.getElementById('guest_login_form')
-		.addEventListener('submit',function(e){
-			var guest_login_formE = e.target;
-			var guest_idStr = guest_login_formE.guest_id.value;
-			var guest_passStr = guest_login_formE.guest_pass.value;
-			if(guest_idStr==''|| guest_passStr==''){
-				guest_login_formE.guest_id.focus();
-				document.getElementById('msg').innerHTML
-					='아이디와패쓰워드를 입력하세요';
-				document.getElementById('msg').style.color='red';
-				e.preventDefault();
-				return;
-			}
-			//ajax login 요청
-			var params='guest_id='+guest_idStr+"&guest_pass="+guest_passStr;
-			sendRequest('guest/guest_login_action',
-					params,displayGuestLoginAction,'POST',true);
-			
-			
-			e.preventDefault();
-			
-		});
-	}
-	
+				.addEventListener('submit',function(e){
+					var guest_login_formE = e.target;
+					var guest_idStr = guest_login_formE.guest_id.value;
+					var guest_passStr = guest_login_formE.guest_pass.value;
+					if(guest_idStr==''|| guest_passStr==''){
+						guest_login_formE.guest_id.focus();
+						document.getElementById('msg').innerHTML
+							='아이디와패쓰워드를 입력하세요';
+						document.getElementById('msg').style.color='red';
+						e.preventDefault();
+						return;
+					}
+					//ajax login 요청
+					var params='guest_id='+guest_idStr+"&guest_pass="+guest_passStr;
+					sendRequest('guest/guest_login_action',
+							params,displayGuestLoginAction,'POST',true);
+					e.preventDefault();
+					
+				});
+		
+		
+	}//onload event end
+	/*%%%%%%%%%%%%%%%%%%%%%%%메뉴 UI이벤트처리 끝%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 	/*%%%%%동적으로추가되는 Node 이벤트처리[DOMNodeInserted이벤트]%%%%%%*/
 	/*******************DOMNodeInserted이벤트*************/
-		document.addEventListener('DOMNodeInserted', function(e) {
-			if(e.target.id == 'guest_write_form'){
+		document.addEventListener('DOMNodeInserted',function(e){
+			if(e.target.className == 'guest_detail'){
+				   var deleteButtonE = e.target.querySelectorAll(".guest_delete input[type='button']").item(0);		
+				   deleteButtonE.addEventListener("click", function(e) {
+				   	sendRequest('guest/guest_delete_action', params, function() {
+				   		
+				   	}, method, async)
+				   });
+				  
+			}else if(e.target.id == 'guest_write_form'){
+				/*****방명록쓰기폼 submit event등록******/
 				var guestWriteFormE = e.target;
-				e.target.addEventListener('submit', function(e1) {
-					var params=
-					   'guest_name='+ guestWriteFormE.guest_name.value+'&'+
-					   'guest_title='+ guestWriteFormE.guest_title.value+'&'+
-					   'guest_content='+ guestWriteFormE.guest_content.value+'&'+
-					   'guest_email='+ guestWriteFormE.guest_email.value+'&'+
-					   'guest_homepage='+ guestWriteFormE.guest_homepage.value;
-					sendRequest('guest/guest_insert_action', params, displayGuestInertAction, 'POST', true);
+				guestWriteFormE.addEventListener('submit',function(e1){
+					
+					var url='guest/guest_insert_action';
+					var params='guest_name='+ guestWriteFormE.guest_name.value+'&'+
+							   'guest_title='+ guestWriteFormE.guest_title.value+'&'+
+							   'guest_content='+ guestWriteFormE.guest_content.value+'&'+
+							   'guest_email='+ guestWriteFormE.guest_email.value+'&'+
+							   'guest_homepage='+ guestWriteFormE.guest_homepage.value;
+							   
+					var callback=displayGuestInertAction;
+					var method='POST';
+					var async=true;
+					//방명록쓰기ajax요청
+					sendRequest(url, params, callback, method, async);
 					e1.preventDefault();
 				});
-
 			}else if(e.target.tagName=='DIV' && e.target.className=='guest_item'){
-				e.target.getElementsByTagName('a').item(0)
-					.addEventListener('click', function(e2) {
-						if(e2.target.parentNode.parentNode.childElementCount > 1){
+				/*
+				<div class="guest_item">
+					<h3 class="guest_title" guest_no="89"><a href="">b[HTML]</a></h3>
+				</div>
+				*/
+				/*****방명록상세보기 a click event등록******/
+				e.target.getElementsByTagName('a')
+					.item(0)
+					.addEventListener('click',function(e2){
+						if(e2.target.parentNode.parentNode.childElementCount >  1){
+							//방명록상세보기ajax요청안함
 							if(e2.target.parentNode.parentNode.lastChild.style.display=='block'){
 								e2.target.parentNode.parentNode.lastChild.style.display='none';
 							}else{
 								e2.target.parentNode.parentNode.lastChild.style.display='block';
-							}	
-						} else {
-							guest_no = e2.target.parentElement.getAttribute('guest_no');
-							sendRequest('guest/guest_detail_json',
-									'guest_no='+guest_no,function(){
-									displayGuestDetailJSON(e2.target.parentElement);
-									},
-									'GET',true);
+							}
+						}else{
+							var guest_no = e2.target.parentElement.getAttribute('guest_no');
+							if(e2.target.innerHTML.endsWith('[HTML]')){
+								//방명록상세보기ajax요청[HTML]
+								sendRequest('guest/guest_detail_html',
+											'guest_no='+guest_no,function(){
+												displayGuestDetailHTML(e2.target.parentElement);
+											},
+											'GET',true);
+							}else if(e2.target.innerHTML.endsWith('[JSON]')){
+								//방명록상세보기ajax요청[JSON]
+								
+								sendRequest('guest/guest_detail_json',
+											'guest_no='+guest_no,function(){
+												displayGuestDetailJSON(e2.target.parentElement);
+											},
+											'GET',true);
+								
+							}else if(e2.target.innerHTML.endsWith('[XML]')){
+								//방명록상세보기ajax요청[XML]
+								
+								sendRequest('guest/guest_detail_xml',
+											'guest_no='+guest_no,function(){
+												displayGuestDetailXML(e2.target.parentElement);
+											},
+											'GET',true);
+							}
 						}
-						
 						e2.preventDefault();
-					});		
-				
-			}else if(e.target.tagName=='DIV' && e.target.className=='guest_detail'){
-				e.target.getElementsByClassName('btnRemove').item(0)
-					.addEventListener('click', function(e3) {
-						guest_no = e3.target.parentElement.getAttribute('guest_no');
-						var params='guest_no='+guest_no;
-						sendRequest('guest/guest_delete_action', params, displayGuestDeleteAction, 'POST', true);
-						e3.preventDefault();
-				});	
-				
-				e.target.getElementsByClassName('btnUpdate').item(0)
-				.addEventListener('click', function(e4) {
-					guest_no = e4.target.parentElement.getAttribute('guest_no');
-					var params='guest_no='+guest_no;
-					sendRequest('guest_insert_form.html', null,
-									function(){
-										displayGuestUpdateForm(guest_no);
-										
-									}			
-								, 'GET', true);
-					e4.preventDefault();
-				});
-					
+					});
 			}
 		});
+		/*******************guest_detail[HTML]이벤트**********/
+		
+		/*******loading dialog************/
+		function showLoadingDialog(isVisible) {
+			if (isVisible) {
+				var dialogDivE = document.createElement('div');
+				dialogDivE.setAttribute('id', 'loading');
+				dialogDivE.innerHTML = 'loading...';
+				dialogDivE.style.display = 'block';
+				var guestListDivE = document.getElementById('guest_list');
+				guestListDivE.parentElement.insertBefore(dialogDivE, guestListDivE);
 	
-	/*******************guest_detail[HTML]이벤트**********/
-	
-	/*******loading dialog************/
+			} else {
+				var loadingDivE = document.getElementById('loading');
+				if (loadingDivE != null) {
+					loadingDivE.parentElement.removeChild(loadingDivE);
+				}
+			}
+		}
 </script>
 </head>
 <body>
