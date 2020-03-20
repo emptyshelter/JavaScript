@@ -411,7 +411,7 @@ label.error {
 			if(e.target.className == 'guest_detail'){
 				   var deleteButtonE = e.target.querySelectorAll(".guest_delete input[type='button']").item(0);		
 				   deleteButtonE.addEventListener("click", function(e) {
-				   	sendRequest('guest/guest_delete_action', params, function() {
+				   	sendRequest(url, params, function() {
 				   		
 				   	}, method, async)
 				   });
